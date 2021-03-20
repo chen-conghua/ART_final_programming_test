@@ -24,16 +24,19 @@ def macstr_to_int(mac_str):
 		return str(sum)
   			
   	
-
 def imu():
-	pass
+	with open(IMUfile, 'w') as f:
+		f.write('')
+	
 
 
 #处理wifi，wifi_l列表，min_t为最小时间
 def wifi(wifi_l,min_t):
+	with open(WIFIfile, 'w') as f:
+				f.write('')
 	for l in wifi_l:
 		temp_l = []
-		temp_l.append(str(int((float(l[2])-min_t)*1000)))
+		temp_l.append(str(int((float(l[2])-min_t)*1000))) #待改
 		temp_l.append(macstr_to_int(l[4].replace(':', '')))
 		if len(l) == 7:
 			temp_l.append(l[6])
@@ -44,16 +47,31 @@ def wifi(wifi_l,min_t):
 				f.write(','.join(temp_l) + '\n')
 
 
-def gnss():
-	pass
+#处理GNSS
+def gnss(gnss_l):
+	with open(GNSSfile, 'w') as f:
+				f.write('')
+	temp_l = []
+	for g in gnss_l:
+		temp_l.append(g[1])
+		temp_l.append(g[2])
+		temp_l.append(g[3])
+		temp_l.append(g[4])
+		temp_l.append(g[5])
+		temp_l.append(g[6])
+		temp_l.append(g[7])
+		temp_l.append(g[9])
+		temp_l.append(g[10])
 
+		with open(GNSSfile, 'a') as f:
+				f.write(','.join(temp_l) + '\n')
 
 with open(originfilename, "r") as f:
 	for line in f:
-		if line[0] == '%':
+		if line[0] == '%' or line[0:4] == "LIGH" or line[0:4] == "SOUN":
 			continue
 		else:
-			if line[0:4] == "ACCE" or line[0:4] == "GYRO" or line[0:4] == "MAGN" or line[0:4] == "PRES"	or line[0:4] == "LIGH" or line[0:4] == "AHRS" or line[0:4] == "SOUN":
+			if line[0:4] == "ACCE" or line[0:4] == "GYRO" or line[0:4] == "MAGN" or line[0:4] == "PRES"	 or line[0:4] == "AHRS":
 				imu_t = line.strip('\n').split(';')
 				if float(imu_t[2]) < min_imu_tim:
   					min_imu_tim = float(imu_t[2])
@@ -73,4 +91,4 @@ with open(originfilename, "r") as f:
 
 imu()
 wifi(wifi_list, min_wifi_tim)
-gnss()
+gnss(gnss_list)
