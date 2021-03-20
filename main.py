@@ -1,3 +1,4 @@
+import numpy as np
 
 originfilename = "logfile_2020_03_19_09_31_56.txt"
 IMUfile = 'imu.txt'
@@ -22,12 +23,66 @@ def macstr_to_int(mac_str):
   			sum = (sum + (ord(i) - 87)) * (16 ** count)
 		count -= 1
 		return str(sum)
-  			
+
   	
-def imu():
+def imu(imu_l, min_t):
 	with open(IMUfile, 'w') as f:
 		f.write('')
-	
+	temp_l = []
+	acce = ['0', '0', '0']
+	gyro = ['0', '0', '0']
+	magnf, magnb = [0, 0, 0], [0, 0, 0]
+	ahrsf, ahrsb = [0, 0, 0], [0, 0, 0]
+	presf, presb = 0, 0
+	count = 0
+	for i in imu_l:
+		if i[0] == 'PRES':
+			presf = presb
+			presb = float(i[3])
+		if presb == 0:
+  			continue
+		if i[0] == 'ACCE':
+			acce[0] = i[3]
+			acce[1] = i[4]
+			acce[2] = i[5]
+		elif i[0] == 'GYRO':
+			gyro[0] = i[3]
+			gyro[1] = i[4]
+			gyro[2] = i[5]
+		elif i[0] == 'MAGN':
+			magnf[0] = magnb[0]
+			magnf[1] = magnb[1]
+			magnf[2] = magnb[2]
+			magnb[0] = i[3]
+			magnb[1] = i[4]
+			magnb[2] = i[5]
+		elif i[0] == 'AHRS':
+			ahrsf[0] = ahrsb[0]
+			ahrsf[1] = ahrsb[1]
+			ahrsf[2] = ahrsb[2]
+			ahrsb[0] = i[3]
+			ahrsb[1] = i[4]
+			ahrsb[2] = i[5]
+		if i[0] == 'ACCE':
+			temp_l.append(str(int(float(i[2]) * 1000) - int(min_t * 1000)))
+			temp_l.append(acce[0])
+			temp_l.append(acce[1])
+			temp_l.append(acce[2])
+			temp_l.append(gyro[0])
+			temp_l.append(gyro[1])
+			temp_l.append(gyro[2])
+			temp_l.append( str((float(magnb[0]) - float(magnf[0])) / 2 ))
+			temp_l.append( str((float(magnb[1]) - float(magnf[1])) / 2 ))
+			temp_l.append( str((float(magnb[2]) - float(magnf[2])) / 2 ))
+			temp_l.append( str((float(ahrsb[0]) - float(ahrsf[0])) / 2 ))
+			temp_l.append( str((float(ahrsb[1]) - float(ahrsf[1])) / 2 ))
+			temp_l.append( str((float(ahrsb[2]) - float(ahrsf[2])) / 2 ))
+			pres_array = np.linspace(presf, presb, 39)
+			temp_l.append(str(pres_array[count]))
+	with open(IMUfile, 'a') as f:
+		f.write(', '.join(temp_l) + '\n')
+			
+
 
 
 #处理wifi，wifi_l列表，min_t为最小时间
@@ -89,6 +144,6 @@ with open(originfilename, "r") as f:
   					min_gnss_tim = float(gnss_t[2])
 				gnss_list.append(gnss_t)
 
-imu()
+imu(imu_list, min_imu_tim)
 wifi(wifi_list, min_wifi_tim)
 gnss(gnss_list)
