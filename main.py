@@ -1,6 +1,8 @@
+#陈聪华
 import numpy as np
 
-originfilename = "logfile_2020_03_19_09_31_56.txt"
+#originfilename = "logfile_2020_03_19_09_31_56.txt"
+originfilename = "EVALUATION(1).txt"
 IMUfile = 'imu.txt'
 WIFIfile = 'wifi.txt'
 GNSSfile = 'gnss.txt'
@@ -24,7 +26,7 @@ def macstr_to_int(mac_str):
 		count -= 1
 		return str(sum)
 
-  	
+#处理IMU  	
 def imu(imu_l, min_t):
 	with open(IMUfile, 'w') as f:
 		f.write('')
@@ -97,8 +99,6 @@ def imu(imu_l, min_t):
 				f.write(', '.join(temp_l) + '\n')
 		
 
-
-
 #处理wifi，wifi_l列表，min_t为最小时间
 def wifi(wifi_l,min_t):
 	with open(WIFIfile, 'w') as f:
@@ -119,10 +119,11 @@ def wifi(wifi_l,min_t):
 #处理GNSS
 def gnss(gnss_l):
 	with open(GNSSfile, 'w') as f:
-				f.write('')
-	temp_l = []
+		f.write('')
+	init_time = float(gnss_l[0][1])
 	for g in gnss_l:
-		temp_l.append(g[1])
+		temp_l = []
+		temp_l.append( str( round( float(g[1]) - init_time, 3) ))
 		temp_l.append(g[2])
 		temp_l.append(g[3])
 		temp_l.append(g[4])
