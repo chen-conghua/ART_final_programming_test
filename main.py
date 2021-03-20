@@ -1,5 +1,9 @@
 
-filename = "logfile_2020_03_19_09_31_56.txt"
+originfilename = "logfile_2020_03_19_09_31_56.txt"
+IMUfile = 'imu.txt'
+WIFIfile = 'wifi.txt'
+GNSSfile = 'gnss.txt'
+
 imu_list = []
 wifi_list = []
 gnss_list = []
@@ -7,34 +11,66 @@ min_imu_tim = float('inf')
 min_wifi_tim = float('inf')
 min_gnss_tim = float('inf')
 
-def imu_p():
+#计算mac地址转化为整数
+def macstr_to_int(mac_str):
+	sum = 0
+	count = 11
+	for i in mac_str:
+		if ord(i) >= 48 and ord(i) <=57:
+  			sum = (sum + int(i)) * (16 ** count)
+		elif ord(i) >= 97 and ord(i) <= 102:
+  			sum = (sum + (ord(i) - 87)) * (16 ** count)
+		count -= 1
+		return str(sum)
+  			
+  	
+
+def imu():
 	pass
 
-def wifi_p():
-  pass	
 
-def gnss_p():
+#处理wifi，wifi_l列表，min_t为最小时间
+def wifi(wifi_l,min_t):
+	for l in wifi_l:
+		temp_l = []
+		temp_l.append(str(int((float(l[2])-min_t)*1000)))
+		temp_l.append(macstr_to_int(l[4].replace(':', '')))
+		if len(l) == 7:
+			temp_l.append(l[6])
+		elif len(l) == 6:
+			temp_l.append(l[5])
+
+		with open(WIFIfile, 'a') as f:
+				f.write(','.join(temp_l) + '\n')
+
+
+def gnss():
 	pass
 
-with open(filename, "r") as f:
+
+with open(originfilename, "r") as f:
 	for line in f:
 		if line[0] == '%':
 			continue
 		else:
 			if line[0:4] == "ACCE" or line[0:4] == "GYRO" or line[0:4] == "MAGN" or line[0:4] == "PRES"	or line[0:4] == "LIGH" or line[0:4] == "AHRS" or line[0:4] == "SOUN":
 				imu_t = line.strip('\n').split(';')
-				if imu_t[2] < min_imu_tim:
-  					min_imu_tim = imu_t[2]
+				if float(imu_t[2]) < min_imu_tim:
+  					min_imu_tim = float(imu_t[2])
 				imu_list.append(imu_t)
 						
 			elif line[0:4] == "WIFI":
 				wifi_t = line.strip('\n').split(';')
-				if wifi_t[2] < min_wifi_tim:
-  					min_wifi_tim = wifi_t[2]
+				if float(wifi_t[2]) < min_wifi_tim:
+  					min_wifi_tim = float(wifi_t[2])
 				wifi_list.append(wifi_t)
 
 			elif line[0:4] == "GNSS":
 				gnss_t = line.strip('\n').split(';')
-				if gnss_t[2] <min_gnss_tim:
-  					min_gnss_tim = gnss_t
+				if float(gnss_t[2]) <min_gnss_tim:
+  					min_gnss_tim = float(gnss_t[2])
 				gnss_list.append(gnss_t)
+
+imu()
+wifi(wifi_list, min_wifi_tim)
+gnss()
