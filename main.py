@@ -92,11 +92,10 @@ def imu(imu_l, min_t):
 			
 			count += 1
 			if count >= 39:
-  				count = 0
-
-		with open(IMUfile, 'a+') as f:
-			f.writelines(','.join(temp_l) + '\n')
-			
+				count = 0
+			with open(IMUfile, 'a') as f:
+				f.write(', '.join(temp_l) + '\n')
+		
 
 
 
