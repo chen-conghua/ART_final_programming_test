@@ -34,14 +34,14 @@ def imu(imu_l, min_t):
 	magnf, magnb = [0, 0, 0], [0, 0, 0]
 	ahrsf, ahrsb = [0, 0, 0], [0, 0, 0]
 	presf, presb = 0, 0
-	count = 0
+	count = 1
 	for i in imu_l:
+		temp_l = []
 		if i[0] == 'PRES':
 			presf = presb
 			presb = float(i[3])
-		if presb == 0:
-  			continue
-		if i[0] == 'ACCE':
+			pres_array = np.linspace(presf, presb, 39)
+		elif i[0] == 'ACCE':
 			acce[0] = i[3]
 			acce[1] = i[4]
 			acce[2] = i[5]
@@ -56,6 +56,9 @@ def imu(imu_l, min_t):
 			magnb[0] = i[3]
 			magnb[1] = i[4]
 			magnb[2] = i[5]
+			magn_array0 = np.linspace(float(magnf[0]), float(magnb[0]), 2)
+			magn_array1 = np.linspace(float(magnf[1]), float(magnb[1]), 2)
+			magn_array2 = np.linspace(float(magnf[2]), float(magnb[2]), 2)
 		elif i[0] == 'AHRS':
 			ahrsf[0] = ahrsb[0]
 			ahrsf[1] = ahrsb[1]
@@ -63,6 +66,14 @@ def imu(imu_l, min_t):
 			ahrsb[0] = i[3]
 			ahrsb[1] = i[4]
 			ahrsb[2] = i[5]
+			ahrs_array0 = np.linspace(float(ahrsf[0]), float(ahrsb[0]), 2)
+			ahrs_array1 = np.linspace(float(ahrsf[1]), float(ahrsb[1]), 2)
+			ahrs_array2 = np.linspace(float(ahrsf[2]), float(ahrsb[2]), 2)
+
+
+		if presf == 0:
+			continue
+
 		if i[0] == 'ACCE':
 			temp_l.append(str(int(float(i[2]) * 1000) - int(min_t * 1000)))
 			temp_l.append(acce[0])
@@ -71,16 +82,20 @@ def imu(imu_l, min_t):
 			temp_l.append(gyro[0])
 			temp_l.append(gyro[1])
 			temp_l.append(gyro[2])
-			temp_l.append( str((float(magnb[0]) - float(magnf[0])) / 2 ))
-			temp_l.append( str((float(magnb[1]) - float(magnf[1])) / 2 ))
-			temp_l.append( str((float(magnb[2]) - float(magnf[2])) / 2 ))
-			temp_l.append( str((float(ahrsb[0]) - float(ahrsf[0])) / 2 ))
-			temp_l.append( str((float(ahrsb[1]) - float(ahrsf[1])) / 2 ))
-			temp_l.append( str((float(ahrsb[2]) - float(ahrsf[2])) / 2 ))
-			pres_array = np.linspace(presf, presb, 39)
+			temp_l.append( str(magn_array0[count % 2]))
+			temp_l.append( str(magn_array1[count % 2]))
+			temp_l.append( str(magn_array2[count % 2]))
+			temp_l.append( str(ahrs_array0[count % 2]))
+			temp_l.append( str(ahrs_array1[count % 2]))
+			temp_l.append( str(ahrs_array2[count % 2]))
 			temp_l.append(str(pres_array[count]))
-	with open(IMUfile, 'a') as f:
-		f.write(', '.join(temp_l) + '\n')
+			
+			count += 1
+			if count >= 39:
+  				count = 0
+
+		with open(IMUfile, 'a+') as f:
+			f.writelines(','.join(temp_l) + '\n')
 			
 
 
